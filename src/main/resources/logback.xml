@@ -1,0 +1,25 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender" level="ALL">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io.vertx" level="ALL" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="io.netty" level="INFO, ERROR" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="io.reactivex" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.springframework" level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="reactive.com" level="ALL" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>
