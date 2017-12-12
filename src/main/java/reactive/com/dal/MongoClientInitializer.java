@@ -50,11 +50,11 @@ public class MongoClientInitializer {
     }
 
 
-    public JsonObject getConfig() {
+    JsonObject getConfig() {
         return config;
     }
 
-    public MongoClient getMongoClient() {
+    MongoClient getMongoClient() {
         return mongoClient;
     }
 }

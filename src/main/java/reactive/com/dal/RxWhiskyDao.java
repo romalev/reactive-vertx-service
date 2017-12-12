@@ -1,7 +1,6 @@
 package reactive.com.dal;
 
 import io.vertx.reactivex.ext.mongo.MongoClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -14,8 +13,11 @@ public class RxWhiskyDao extends AbstractRxBaseDao {
 
     private static final String COLLECTION_NAME = "Whiskies";
 
-    @Autowired
     private MongoClientInitializer mongoClientInitializer;
+
+    public RxWhiskyDao(MongoClientInitializer mongoClientInitializer) {
+        this.mongoClientInitializer = mongoClientInitializer;
+    }
 
     @Override
     protected MongoClient getClient() {

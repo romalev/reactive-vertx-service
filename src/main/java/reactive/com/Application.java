@@ -6,7 +6,6 @@ import io.vertx.reactivex.core.RxHelper;
 import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -31,8 +30,11 @@ public class Application {
     private static Vertx vertx;
     private static ConfigurableApplicationContext appContext;
 
-    @Autowired
     private AbstractVerticle gatewayVerticle;
+
+    public Application(final AbstractVerticle gatewayVerticle) {
+        this.gatewayVerticle = gatewayVerticle;
+    }
 
     public static void main(String[] args) {
         LOGGER.debug("Butting up an reactive app...");

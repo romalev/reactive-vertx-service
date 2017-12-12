@@ -1,4 +1,4 @@
-package reactive.com.front.handlers;
+package reactive.com.rest.handlers;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Flowable;
@@ -8,8 +8,6 @@ import io.vertx.core.json.Json;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactive.com.dal.RxWhiskyDao;
 import reactive.com.model.Whisky;
 
@@ -20,13 +18,15 @@ import java.util.List;
  * <p>
  * Created by RLYBD20 on 22/11/2017.
  */
-@Component
 public class GetAllWhiskiesHandler implements Handler<RoutingContext> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(GetAllWhiskiesHandler.class);
 
-    @Autowired
     private RxWhiskyDao rxWhiskyDao;
+
+    public GetAllWhiskiesHandler(RxWhiskyDao rxWhiskyDao) {
+        this.rxWhiskyDao = rxWhiskyDao;
+    }
 
     @Override
     public void handle(RoutingContext event) {
@@ -45,7 +45,7 @@ public class GetAllWhiskiesHandler implements Handler<RoutingContext> {
     private class ConsumerOnFailure implements Consumer<Throwable> {
         private final RoutingContext event;
 
-        public ConsumerOnFailure(RoutingContext event) {
+        ConsumerOnFailure(RoutingContext event) {
             this.event = event;
         }
 
@@ -63,7 +63,7 @@ public class GetAllWhiskiesHandler implements Handler<RoutingContext> {
     private class ConsumerOnSuccess implements Consumer<List<Whisky>> {
         private final RoutingContext event;
 
-        public ConsumerOnSuccess(RoutingContext event) {
+        ConsumerOnSuccess(RoutingContext event) {
             this.event = event;
         }
 

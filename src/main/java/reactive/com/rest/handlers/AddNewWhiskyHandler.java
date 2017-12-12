@@ -1,4 +1,4 @@
-package reactive.com.front.handlers;
+package reactive.com.rest.handlers;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactive.com.dal.RxWhiskyDao;
 
 /**
@@ -18,13 +16,15 @@ import reactive.com.dal.RxWhiskyDao;
  * <p>
  * Created by RLYBD20 on 22/11/2017.
  */
-@Component
 public class AddNewWhiskyHandler implements Handler<RoutingContext> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AddNewWhiskyHandler.class);
 
-    @Autowired
     private RxWhiskyDao rxWhiskyDao;
+
+    public AddNewWhiskyHandler(RxWhiskyDao rxWhiskyDao) {
+        this.rxWhiskyDao = rxWhiskyDao;
+    }
 
     @Override
     public void handle(RoutingContext event) {

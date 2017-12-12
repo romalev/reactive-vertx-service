@@ -1,4 +1,4 @@
-package reactive.com.front.handlers;
+package reactive.com.rest.handlers;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.functions.Consumer;
@@ -7,8 +7,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactive.com.dal.RxWhiskyDao;
 import reactive.com.mappers.Mapper;
 
@@ -16,19 +14,22 @@ import java.util.Objects;
 
 /**
  * Responsible for deleting whiskies from persistent storage.
- *
+ * <p>
  * Created by RLYBD20 on 24/11/2017.
  */
-@Component
 public class DeleteWhiskyHandler implements Handler<RoutingContext> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DeleteWhiskyHandler.class);
     private final static String ID = "id";
 
-    @Autowired
+
     private RxWhiskyDao rxWhiskyDao;
-    @Autowired
-    private Mapper stackTraceToStringMapper;
+    private Mapper<Throwable, String> stackTraceToStringMapper;
+
+    public DeleteWhiskyHandler(RxWhiskyDao rxWhiskyDao, Mapper<Throwable, String> stackTraceToStringMapper) {
+        this.rxWhiskyDao = rxWhiskyDao;
+        this.stackTraceToStringMapper = stackTraceToStringMapper;
+    }
 
     @Override
     public void handle(RoutingContext event) {
@@ -44,7 +45,7 @@ public class DeleteWhiskyHandler implements Handler<RoutingContext> {
     private static class ConsumerOnSuccess implements Consumer<JsonObject> {
         private final RoutingContext event;
 
-        public ConsumerOnSuccess(RoutingContext event) {
+        ConsumerOnSuccess(RoutingContext event) {
             this.event = event;
         }
 
@@ -69,7 +70,7 @@ public class DeleteWhiskyHandler implements Handler<RoutingContext> {
     private class ConsumerOnFailure implements Consumer<Throwable> {
         private final RoutingContext event;
 
-        public ConsumerOnFailure(RoutingContext event) {
+        ConsumerOnFailure(RoutingContext event) {
             this.event = event;
         }
 
