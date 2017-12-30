@@ -5,6 +5,8 @@ import io.reactivex.Flowable;
 import io.reactivex.functions.Consumer;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.circuitbreaker.CircuitBreaker;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,23 +25,33 @@ public class GetAllWhiskiesHandler implements Handler<RoutingContext> {
     private final static Logger LOGGER = LoggerFactory.getLogger(GetAllWhiskiesHandler.class);
 
     private RxWhiskyDao rxWhiskyDao;
+    private CircuitBreaker circuitBreaker;
 
-    public GetAllWhiskiesHandler(RxWhiskyDao rxWhiskyDao) {
+    public GetAllWhiskiesHandler(RxWhiskyDao rxWhiskyDao, CircuitBreaker circuitBreaker) {
         this.rxWhiskyDao = rxWhiskyDao;
+        this.circuitBreaker = circuitBreaker;
     }
 
     @Override
     public void handle(RoutingContext event) {
-        rxWhiskyDao
-                .fetchAll()
-                .map(entry -> entry.mapTo(Whisky.class))
-                // swallow an error by continuing the flow
-                .onErrorResumeNext(throwable -> {
-                    LOGGER.warn("Something went wrong with fetching all whiskies. {}", throwable);
-                    return Flowable.empty();
-                })
-                .toList()
-                .subscribe(new ConsumerOnSuccess(event), new ConsumerOnFailure(event));
+        // TODO : this code has to be investigated more deeply.
+        circuitBreaker
+                .rxExecuteCommandWithFallback(
+                        future -> rxWhiskyDao
+                                .fetchAll()
+                                .map(entry -> entry.mapTo(Whisky.class))
+                                // swallow an error by continuing the flow
+                                .doOnError(throwable -> {
+                                    LOGGER.warn("Something went wrong with fetching all whiskies : {}", throwable.getMessage());
+                                })
+                                .toList()
+                                .subscribe(new ConsumerOnSuccess(event)),
+                        fallback -> {
+                            LOGGER.warn("Fallback is executed. Details : {}", fallback.getMessage());
+                            new ConsumerOnFailure(event).accept(fallback);
+                            return new JsonObject().put("message", "Post your issue to our portal.");
+                        })
+        .subscribe();
     }
 
     private class ConsumerOnFailure implements Consumer<Throwable> {
@@ -50,7 +62,7 @@ public class GetAllWhiskiesHandler implements Handler<RoutingContext> {
         }
 
         @Override
-        public void accept(Throwable throwable) throws Exception {
+        public void accept(Throwable throwable) {
             LOGGER.error("Error has occurred while fetching whiskies. Details : {}", throwable.getMessage());
             event
                     .response()

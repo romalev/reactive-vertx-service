@@ -1,9 +1,12 @@
 package reactive.com.config;
 
+import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Handler;
+import io.vertx.reactivex.circuitbreaker.CircuitBreaker;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactive.com.Application;
 import reactive.com.dal.MongoClientInitializer;
 import reactive.com.dal.RxWhiskyDao;
 import reactive.com.mappers.Mapper;
@@ -44,7 +47,7 @@ public class AppConfiguration {
 
     @Bean
     public Handler<RoutingContext> getGetAllWhiskiesHandler() {
-        return new GetAllWhiskiesHandler(getRxWhiskyDao());
+        return new GetAllWhiskiesHandler(getRxWhiskyDao(), getDefaultCircuitBreaker());
     }
 
     @Bean
@@ -63,5 +66,14 @@ public class AppConfiguration {
                 getGetAllWhiskiesHandler(),
                 getUpdateWhiskyHandler(),
                 getDeleteWhiskyHandler());
+    }
+
+    @Bean
+    public CircuitBreaker getDefaultCircuitBreaker() {
+        return CircuitBreaker.create("default-CB", Application.getVertx(), new CircuitBreakerOptions()
+                .setMaxFailures(5) // number of failure before opening the circuit
+                .setTimeout(4000) // consider a failure if the operation does not succeed in time
+                .setFallbackOnFailure(true) // do we call the fallback on failure
+                .setResetTimeout(10000)); // time spent in open state before attempting to re-try)
     }
 }
